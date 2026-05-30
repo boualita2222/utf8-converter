@@ -1,0 +1,54 @@
+{% extends 'convertisseur/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Profil — {{ request.user.username }}</h2>
+  <p class="info">
+    Email : {{ request.user.email }}</p>
+  <p style="color:#555;font-size:12px">
+    Membre depuis :
+    {{ request.user.date_joined|date:"d/m/Y" }}
+  </p>
+</div>
+
+<div class="card">
+  <h2>Mon historique</h2>
+  {% if historique %}
+  <table>
+    <tr>
+      <th>Operation</th>
+      <th>Entree</th>
+      <th>Sortie</th>
+      <th>Octets</th>
+      <th>Date</th>
+    </tr>
+    {% for item in historique %}
+    <tr>
+      <td class="hex">{{ item.operation }}</td>
+      <td class="ok">
+        {{ item.entree|truncatechars:20 }}</td>
+      <td class="info">
+        {{ item.sortie|truncatechars:20 }}</td>
+      <td>{{ item.nb_octets }}</td>
+      <td style="color:#555">
+        {{ item.date|date:"d/m/Y H:i" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="color:#555">
+    Aucune conversion pour l instant.</p>
+  {% endif %}
+</div>
+
+<div class="card">
+  <form method="post"
+        action="{% url 'deconnexion' %}">
+    {% csrf_token %}
+    <button type="submit"
+            style="border-color:#ff4444;
+                   color:#ff4444">
+      Se deconnecter
+    </button>
+  </form>
+</div>
+{% endblock %}

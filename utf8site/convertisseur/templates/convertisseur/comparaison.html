@@ -1,0 +1,166 @@
+{% extends 'convertisseur/base.html' %}
+{% block content %}
+
+<div class="card">
+  <h2>[5] COMPARAISON — Deux textes UTF-8</h2>
+
+  <form method="post">
+    {% csrf_token %}
+
+    <div style="display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:15px">
+      <div>
+        <label>Texte 1 :</label>
+        <input type="text"
+               name="texte1"
+               value="{{ texte1 }}"
+               placeholder="cafe">
+      </div>
+      <div>
+        <label>Texte 2 :</label>
+        <input type="text"
+               name="texte2"
+               value="{{ texte2 }}"
+               placeholder="café">
+      </div>
+    </div>
+
+    <button type="submit"
+            style="margin-top:10px;
+                   border-color:#ff79c6;
+                   color:#ff79c6">
+      Comparer →
+    </button>
+  </form>
+
+  {% if erreur %}
+  <div class="result">
+    <span class="err">{{ erreur }}</span>
+  </div>
+  {% endif %}
+
+  {% if resultat %}
+  <div class="result">
+
+    <!-- Résumé -->
+    <div style="display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:15px;margin-bottom:15px">
+      <div style="background:#0a0a0a;
+                  border:1px solid #1e3a1e;
+                  border-radius:4px;
+                  padding:12px">
+        <p style="color:#ffb000;
+                  font-size:12px">
+          TEXTE 1</p>
+        <p class="ok" style="font-size:18px">
+          {{ resultat.texte1 }}</p>
+        <p class="info">
+          {{ resultat.oct1 }} octets</p>
+      </div>
+      <div style="background:#0a0a0a;
+                  border:1px solid #1e3a1e;
+                  border-radius:4px;
+                  padding:12px">
+        <p style="color:#ffb000;
+                  font-size:12px">
+          TEXTE 2</p>
+        <p class="ok" style="font-size:18px">
+          {{ resultat.texte2 }}</p>
+        <p class="info">
+          {{ resultat.oct2 }} octets</p>
+      </div>
+    </div>
+
+    <!-- Résultat identique ou différent -->
+    {% if resultat.identiques %}
+    <div style="background:#0a140a;
+                border:1px solid #00ff41;
+                border-radius:4px;
+                padding:12px;
+                text-align:center;
+                margin-bottom:15px">
+      <p class="ok"
+         style="font-size:16px">
+        IDENTIQUES !
+      </p>
+      <p style="color:#555;font-size:12px">
+        Les deux textes ont le meme
+        encodage UTF-8</p>
+    </div>
+
+    {% else %}
+    <div style="background:#140a0a;
+                border:1px solid #ff4444;
+                border-radius:4px;
+                padding:12px;
+                text-align:center;
+                margin-bottom:15px">
+      <p class="err"
+         style="font-size:16px">
+        {{ resultat.differences|length }}
+        DIFFERENCE(S) TROUVEE(S)
+      </p>
+      <p style="color:#555;font-size:12px">
+        Difference en octets :
+       {{ resultat.diff_octets }}
+      </p>
+    </div>
+
+    <!-- Tableau des différences -->
+    <table>
+      <tr>
+        <th>Position</th>
+        <th>Texte 1</th>
+        <th>Hex 1</th>
+        <th></th>
+        <th>Texte 2</th>
+        <th>Hex 2</th>
+      </tr>
+      {% for d in resultat.differences %}
+      <tr>
+        <td style="color:#555">
+          {{ d.pos }}</td>
+        <td class="ok">
+          {{ d.c1|default:"-" }}</td>
+        <td class="hex">{{ d.h1 }}</td>
+        <td class="err"
+            style="text-align:center">
+          !=</td>
+        <td class="ok">
+          {{ d.c2|default:"-" }}</td>
+        <td class="hex">{{ d.h2 }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% endif %}
+
+    <!-- Séquences hex complètes -->
+    <div style="margin-top:15px">
+      <p style="color:#ffb000;
+                font-size:12px;
+                margin-bottom:5px">
+        SEQUENCES COMPLETES :</p>
+      <p style="font-size:12px;
+                margin-bottom:5px">
+        <span style="color:#555">
+          Texte 1 : </span>
+        <span class="hex">
+          {{ resultat.hex1|default:"" }}
+        </span>
+      </p>
+      <p style="font-size:12px">
+        <span style="color:#555">
+          Texte 2 : </span>
+        <span class="hex">
+          {{ resultat.hex2|default:"" }}
+        </span>
+      </p>
+    </div>
+
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

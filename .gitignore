@@ -1,0 +1,29 @@
+# Base de donnees
+*.db
+*.db-journal
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Environnement
+venv/
+venv_314/
+.env
+
+# VS Code
+.vscode/
+
+# Fichiers inutiles
+string_old.py
+colorama_old.py
+*.tmp
+*.log
+staticfiles/

@@ -1,0 +1,21 @@
+# Secrets
+.env
+*.env
+
+# Base de donnees
+*.db
+*.db-journal
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Static files generes
+staticfiles/
+
+# PyInstaller
+*.spec
+build/
+dist/

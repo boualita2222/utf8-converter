@@ -1,0 +1,30 @@
+{% extends 'convertisseur/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>Historique des conversions</h2>
+  {% if items %}
+  <table>
+    <tr>
+      <th>Operation</th>
+      <th>Entree</th>
+      <th>Sortie</th>
+      <th>Octets</th>
+      <th>Date</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+      <td class="hex">{{ item.operation }}</td>
+      <td class="ok">{{ item.entree|truncatechars:20 }}</td>
+      <td class="info">{{ item.sortie|truncatechars:20 }}</td>
+      <td>{{ item.nb_octets }}</td>
+      <td style="color:#555">
+        {{ item.date|date:"d/m/Y H:i" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p style="color:#555">
+    Aucune conversion pour l instant.</p>
+  {% endif %}
+</div>
+{% endblock %}

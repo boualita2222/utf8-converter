@@ -1,0 +1,38 @@
+{% extends 'convertisseur/base.html' %}
+{% block content %}
+<div class="card" style="max-width:400px;margin:0 auto">
+  <h2>Inscription</h2>
+
+  {% if messages %}
+    {% for msg in messages %}
+    <p class="ok" style="margin-bottom:10px">
+      {{ msg }}
+    </p>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+    <label>{{ field.label }}</label>
+    {{ field }}
+    {% if field.errors %}
+      <p class="err" style="font-size:12px">
+        {{ field.errors }}</p>
+    {% endif %}
+    {% endfor %}
+    <button type="submit"
+            style="width:100%;margin-top:10px">
+      S inscrire
+    </button>
+  </form>
+  <p style="margin-top:15px;
+            color:#555;text-align:center">
+    Deja un compte ?
+    <a href="{% url 'connexion' %}"
+       style="color:#00ff41">
+      Se connecter
+    </a>
+  </p>
+</div>
+{% endblock %}

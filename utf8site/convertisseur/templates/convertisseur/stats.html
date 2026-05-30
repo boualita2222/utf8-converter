@@ -1,0 +1,69 @@
+{% extends 'convertisseur/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>[4] STATS — Statistiques UTF-8</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label>Texte a analyser :</label>
+    <input type="text" name="texte"
+           value="{{ texte }}"
+           placeholder="Bonjour c est l ete">
+    <button type="submit"
+            style="border-color:#ff79c6;
+                   color:#ff79c6">
+      Analyser</button>
+  </form>
+
+  {% if erreur %}
+  <div class="result">
+    <span class="err">Erreur : {{ erreur }}</span>
+  </div>
+  {% endif %}
+
+  {% if resultat %}
+  <div class="result">
+    <p class="ok">Texte      : {{ resultat.texte }}</p>
+    <p class="info">Caracteres : {{ resultat.nb_chars }}</p>
+    <p class="hex">Octets     : {{ resultat.nb_octets }}</p>
+    <p>ASCII%     : {{ resultat.pct_ascii|floatformat:1 }}%</p>
+    <br>
+    <table>
+      <tr>
+        <th>Type</th>
+        <th>Chars</th>
+        <th>Octets</th>
+      </tr>
+      {% if resultat.types.1 %}
+      <tr>
+        <td>ASCII (1 oct)</td>
+        <td class="ok">{{ resultat.types.1|length }}</td>
+        <td>{{ resultat.types.1|length }}</td>
+      </tr>
+      {% endif %}
+      {% if resultat.types.2 %}
+      <tr>
+        <td>Latin (2 oct)</td>
+        <td class="info">{{ resultat.types.2|length }}</td>
+        <td>{{ resultat.types.2|length|add:resultat.types.2|length }}</td>
+      </tr>
+      {% endif %}
+      {% if resultat.types.3 %}
+      <tr>
+        <td>Symboles (3 oct)</td>
+        <td class="hex">{{ resultat.types.3|length }}</td>
+        <td></td>
+      </tr>
+      {% endif %}
+      {% if resultat.types.4 %}
+      <tr>
+        <td>Emojis (4 oct)</td>
+        <td style="color:#ff79c6">
+          {{ resultat.types.4|length }}</td>
+        <td></td>
+      </tr>
+      {% endif %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'convertisseur/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>[3] ANALYSER — Caractere complet</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label>Caractere a analyser :</label>
+    <input type="text" name="char"
+           value="{{ char }}"
+           placeholder="A ou euro"
+           maxlength="2">
+    <button type="submit"
+            style="border-color:#ffb000;
+                   color:#ffb000">
+      Analyser</button>
+  </form>
+
+  {% if erreur %}
+  <div class="result">
+    <span class="err">Erreur : {{ erreur }}</span>
+  </div>
+  {% endif %}
+
+  {% if resultat %}
+  <div class="result">
+    <table>
+      <tr><td class="hex">Caractere</td>
+          <td class="ok">{{ resultat.char }}</td></tr>
+      <tr><td class="hex">Codepoint</td>
+          <td class="info">
+            U+{{ resultat.cp|stringformat:"04X" }}
+          </td></tr>
+      <tr><td class="hex">Decimal</td>
+          <td>{{ resultat.cp }}</td></tr>
+      <tr><td class="hex">Hex UTF-8</td>
+          <td class="hex">{{ resultat.hex }}</td></tr>
+      <tr><td class="hex">Binaire</td>
+          <td class="info">{{ resultat.bin }}</td></tr>
+      <tr><td class="hex">Octets</td>
+          <td>{{ resultat.n }}</td></tr>
+      <tr><td class="hex">Decimal brut</td>
+          <td>{{ resultat.raw_int }}</td></tr>
+      <tr><td class="hex">Nom Unicode</td>
+          <td class="ok">{{ resultat.nom }}</td></tr>
+      <tr><td class="hex">Categorie</td>
+          <td>{{ resultat.cat }}</td></tr>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

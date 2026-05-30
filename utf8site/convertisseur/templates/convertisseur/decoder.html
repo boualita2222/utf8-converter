@@ -1,0 +1,46 @@
+{% extends 'convertisseur/base.html' %}
+{% block content %}
+<div class="card">
+  <h2>[2] DECODER — UTF-8 vers Texte</h2>
+  <form method="post">
+    {% csrf_token %}
+    <label>Sequence hex UTF-8 :</label>
+    <input type="text" name="hex"
+           value="{{ hex_str }}"
+           placeholder="C3 A9 20 E2 82 AC">
+    <button type="submit"
+            style="border-color:#00e5ff;
+                   color:#00e5ff">
+      Decoder</button>
+  </form>
+
+  {% if erreur %}
+  <div class="result">
+    <span class="err">Erreur : {{ erreur }}</span>
+  </div>
+  {% endif %}
+
+  {% if resultat %}
+  <div class="result">
+    <p class="ok">Texte : {{ resultat.texte }}</p>
+    <br>
+    <table>
+      <tr>
+        <th>Hex</th>
+        <th>Char</th>
+        <th>Codepoint</th>
+        <th>Octets</th>
+      </tr>
+      {% for d in resultat.details %}
+      <tr>
+        <td class="hex">{{ d.hex }}</td>
+        <td class="ok">{{ d.char }}</td>
+        <td class="info">U+{{ d.cp|stringformat:"04X" }}</td>
+        <td>{{ d.n }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

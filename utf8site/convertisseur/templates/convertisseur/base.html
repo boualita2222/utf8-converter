@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>UTF-8 Converter Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Courier New',monospace;
+     background:#0d0d0d;color:#e0e0e0;
+     padding:20px}
+h1{color:#00ff41;text-align:center;
+   padding:20px;border:1px solid #1e3a1e;
+   margin-bottom:20px}
+nav{background:#111;border:1px solid #1e3a1e;
+    padding:10px;margin-bottom:20px;
+    text-align:center}
+nav a{color:#ffb000;text-decoration:none;
+      margin:0 15px;font-size:14px}
+nav a:hover{color:#00ff41}
+.card{background:#111;border:1px solid #1e3a1e;
+      border-radius:6px;padding:20px;
+      margin-bottom:20px}
+h2{color:#ffb000;margin-bottom:15px}
+label{color:#ffb000;font-size:13px;
+      display:block;margin-bottom:5px}
+input,textarea{width:100%;background:#0a0a0a;
+  border:1px solid #1e3a1e;color:#00ff41;
+  font-family:'Courier New',monospace;
+  font-size:13px;padding:10px;
+  border-radius:4px;margin-bottom:10px}
+button{background:#0a0a0a;
+       border:1px solid #00ff41;
+       color:#00ff41;
+       font-family:'Courier New',monospace;
+       font-size:13px;padding:8px 20px;
+       border-radius:4px;cursor:pointer}
+button:hover{background:#1a2a1a}
+.result{background:#080808;
+        border:1px solid #1a2a1a;
+        border-radius:4px;padding:15px;
+        margin-top:15px}
+.ok{color:#00ff41}
+.err{color:#ff4444}
+.hex{color:#ffb000}
+.info{color:#00e5ff}
+table{width:100%;border-collapse:collapse;
+      font-size:13px}
+th{color:#ffb000;text-align:left;
+   padding:8px;border-bottom:1px solid #1e3a1e}
+td{padding:6px 8px;
+   border-bottom:1px solid #0f1f0f}
+.footer{text-align:center;color:#555;
+        font-size:11px;margin-top:20px}
+</style>
+</head>
+<body>
+<h1>UTF-8 CONVERTER PRO<br>
+<small style="font-size:13px;color:#555">
+Django 6.0 + Python 3.14.2</small></h1>
+
+<nav>
+<a href="{% url 'comparaison' %}"
+   style="color:#ff79c6">
+  Comparaison
+</a>
+  <a href="{% url 'accueil' %}">Accueil</a>
+  <a href="{% url 'encoder' %}">Encoder</a>
+  <a href="{% url 'decoder' %}">Decoder</a>
+  <a href="{% url 'analyser' %}">Analyser</a>
+  <a href="{% url 'stats' %}">Stats</a>
+</nav>
+
+{% block content %}{% endblock %}
+
+<div class="footer">
+  UTF-8 Converter Pro — Python 3.14.2
+</div>
+</body>
+</html>
