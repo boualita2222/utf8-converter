@@ -1,0 +1,65 @@
+# utf8_converter.spec
+# -*- mode: python -*-
+
+import os
+
+block_cipher = None
+
+# Fichiers supplémentaires à inclure
+added_files = [
+    ("utf8_package\\*.py",    "utf8_package"),
+    ("utf8_db.py",            "."),
+]
+
+a = Analysis(
+    ["utf8_gui.py"],
+    pathex=[r"C:\PythonProjets"],
+    binaries=[],
+    datas=added_files,
+    hiddenimports=[
+        "utf8_package",
+        "utf8_package.encodeur",
+        "utf8_package.decodeur",
+        "utf8_package.analyseur",
+        "utf8_package.utils",
+        "utf8_db",
+        "sqlite3",
+        "unicodedata",
+        "colorama",
+        "tkinter",
+        "tkinter.ttk",
+        "tkinter.messagebox",
+        "tkinter.scrolledtext",
+        "tkinter.simpledialog",
+    ],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(
+    a.pure,
+    a.zipped_data,
+    cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    [],
+    name="UTF8Converter",
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=False,         # pas de fenetre noire !
+    icon=None,
+)

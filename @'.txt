@@ -1,0 +1,28 @@
+# Base de donnees
+*.db
+*.db-journal
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.spec
+
+# PyInstaller
+build/
+dist/
+
+# Environnement virtuel
+venv_314/
+venv/
+.env
+
+# VS Code
+.vscode/
+
+# Fichiers temporaires
+*.tmp
+*.log
+string_old.py
+colorama_old.py

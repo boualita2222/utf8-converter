@@ -1,0 +1,12 @@
+class UTF8ConverterPro("UTF8Converter"):
+    """
+    Version Pro — hérite de UTF8Converter
+    et ajoute de nouvelles fonctionnalités !
+    """
+    def __init__(self):
+        super().__init__()
+       # elif historique = []
+       # elif nb_operations = 0]
+
+    def _rapport_html(self, texte):
+        ...

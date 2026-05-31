@@ -1,0 +1,15 @@
+class UTF8Converter:
+    #      ↑
+    #   La classe = le plan de fabrication
+    #   comme une recette de gâteau
+
+    def __init__(self):
+    
+
+        self.historique = [0]
+        
+    def _encode_char(self, c): any
+   
+
+    def encoder(self, texte): 
+        

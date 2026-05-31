@@ -1,0 +1,37 @@
+=======================================================
+  RAPPORT D'ANALYSE UTF-8
+=======================================================
+  Fichier   : C:\PythonProjets\test_utf8.txt
+  Encodage  : UTF-8
+  Caractères: 79
+  Octets    : 105
+=======================================================
+
+  ASCII    (1 octet) 
+    Caractères : 62  (59.0%)
+    Octets     : 62
+    Uniques    : Bonjur lemd!caf
+
+  Latin    (2 octets)
+    Caractères : 10  (19.0%)
+    Octets     : 20
+    Uniques    : é©ñüçœß
+
+  Symboles (3 octets)
+    Caractères : 5  (14.3%)
+    Octets     : 15
+    Uniques    : ❤️€™♥
+
+  Emojis   (4 octets)
+    Caractères : 2  (7.6%)
+    Octets     : 8
+    Uniques    : 🌍🐍
+
+=======================================================
+  CONTENU DU FICHIER
+=======================================================
+Bonjour le monde !
+café thé été
+emoji : 🌍 🐍 ❤️
+symboles : € ™ ♥ ©
+latin : ñ ü ç œ ß
