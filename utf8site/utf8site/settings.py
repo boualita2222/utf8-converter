@@ -18,8 +18,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',              # ← ajoutez !
-    'rest_framework.authtoken',    # ← ajoutez !
+    'rest_framework',
+    'rest_framework.authtoken',
+    'drf_spectacular',              # ← ajoutez !
     'convertisseur',
 ]
 
@@ -111,4 +112,50 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+}
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS':
+        'drf_spectacular.openapi.AutoSchema',
+    # ... le reste de votre config ...
+}
+# Swagger / OpenAPI
+SPECTACULAR_SETTINGS = {
+    'TITLE':       'UTF-8 Converter API',
+    'DESCRIPTION': """
+API complète pour encoder, décoder et analyser
+des caractères Unicode UTF-8.
+
+## Fonctionnalités
+- **Encoder** : Texte → Hex UTF-8
+- **Decoder** : Hex UTF-8 → Texte
+- **Analyser** : Détails d'un caractère
+- **Comparer** : Deux textes côte à côte
+- **Stats**   : Statistiques UTF-8
+
+## Auteur
+boualita2222 — Python 3.14.2 + Django 6.0
+    """,
+    'VERSION':     '2.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'CONTACT': {
+        'name':  'boualita2222',
+        'url':   'https://github.com/boualita2222',
+    },
+    'LICENSE': {
+        'name': 'MIT License',
+    },
+    'TAGS': [
+        {'name': 'encoder',
+         'description': 'Encodage UTF-8'},
+        {'name': 'decoder',
+         'description': 'Decodage UTF-8'},
+        {'name': 'analyser',
+         'description': 'Analyse Unicode'},
+        {'name': 'comparer',
+         'description': 'Comparaison UTF-8'},
+        {'name': 'stats',
+         'description': 'Statistiques'},
+        {'name': 'historique',
+         'description': 'Historique'},
+    ],
 }

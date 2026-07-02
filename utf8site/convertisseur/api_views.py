@@ -5,7 +5,13 @@ from rest_framework.decorators import api_view
 from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
     IsAuthenticated)
-from django.contrib.auth.models import User
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+    OpenApiParameter,
+    OpenApiExample,
+    OpenApiResponse)
+from drf_spectacular.types import OpenApiTypes
 import sys
 import os
 
@@ -37,28 +43,45 @@ def sauvegarder(request, op, entree,
                     if request.user.is_authenticated
                     else None,
         operation = op,
-        entree    = entree,
-        sortie    = sortie,
+        entree    = str(entree)[:200],
+        sortie    = str(sortie)[:200],
         nb_chars  = nb_chars,
         nb_octets = nb_octets)
 
 
 # ════════════════════════════════════════════
-#  VUE ENCODEUR
+#  ENCODEUR
 # ════════════════════════════════════════════
+@extend_schema_view(
+    get=extend_schema(
+        tags=['encoder'],
+        summary='Encoder un texte en UTF-8',
+        description='Convertit un texte en sequence hexadecimale UTF-8',
+        parameters=[
+            OpenApiParameter(
+                name='texte',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Texte a encoder',
+                examples=[
+                    OpenApiExample('Simple', value='cafe'),
+                    OpenApiExample('Bonjour', value='Bonjour'),
+                ])
+        ]),
+    post=extend_schema(
+        tags=['encoder'],
+        summary='Encoder via POST',
+        examples=[
+            OpenApiExample(
+                'Exemple',
+                value={'texte': 'cafe'},
+                request_only=True),
+        ]))
 class EncoderAPIView(APIView):
-    """
-    Encode un texte en UTF-8
-
-    POST /api/encoder/
-    Body: {"texte": "café"}
-
-    GET /api/encoder/?texte=café
-    """
+    """Encode un texte en UTF-8"""
 
     def get(self, request):
-        texte = request.query_params.get(
-            'texte', '')
+        texte = request.query_params.get('texte', '')
         if not texte:
             return Response(
                 {'erreur': 'Parametre texte requis'},
@@ -68,19 +91,17 @@ class EncoderAPIView(APIView):
     def post(self, request):
         ser = EncoderSerializer(data=request.data)
         if not ser.is_valid():
-            return Response(
-                ser.errors,
+            return Response(ser.errors,
                 status=status.HTTP_400_BAD_REQUEST)
-        texte = ser.validated_data['texte']
-        return self._encoder(request, texte)
+        return self._encoder(
+            request, ser.validated_data['texte'])
 
     def _encoder(self, request, texte):
         try:
             res = encoder_texte(texte)
             sauvegarder(request, 'ENCODE',
-                        texte, res['hex'],
-                        res['nb_chars'],
-                        res['nb_octets'])
+                texte, res['hex'],
+                res['nb_chars'], res['nb_octets'])
             return Response({
                 'texte':     texte,
                 'hex':       res['hex'],
@@ -89,27 +110,37 @@ class EncoderAPIView(APIView):
                 'details':   res['details'],
             })
         except Exception as e:
-            return Response(
-                {'erreur': str(e)},
+            return Response({'erreur': str(e)},
                 status=status.HTTP_400_BAD_REQUEST)
 
 
 # ════════════════════════════════════════════
-#  VUE DECODEUR
+#  DECODEUR
 # ════════════════════════════════════════════
+@extend_schema_view(
+    get=extend_schema(
+        tags=['decoder'],
+        summary='Decoder une sequence hex UTF-8',
+        parameters=[
+            OpenApiParameter(
+                name='hex',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Sequence hex a decoder',
+                examples=[
+                    OpenApiExample('e accent', value='C3 A9'),
+                    OpenApiExample('Euro', value='E2 82 AC'),
+                    OpenApiExample('Emoji', value='F0 9F 90 8D'),
+                ])
+        ]),
+    post=extend_schema(
+        tags=['decoder'],
+        summary='Decoder via POST'))
 class DecoderAPIView(APIView):
-    """
-    Decode une sequence hex UTF-8
-
-    POST /api/decoder/
-    Body: {"hex": "C3 A9"}
-
-    GET /api/decoder/?hex=C3+A9
-    """
+    """Decode une sequence hex UTF-8"""
 
     def get(self, request):
-        hex_str = request.query_params.get(
-            'hex', '')
+        hex_str = request.query_params.get('hex', '')
         if not hex_str:
             return Response(
                 {'erreur': 'Parametre hex requis'},
@@ -119,44 +150,52 @@ class DecoderAPIView(APIView):
     def post(self, request):
         ser = DecoderSerializer(data=request.data)
         if not ser.is_valid():
-            return Response(
-                ser.errors,
+            return Response(ser.errors,
                 status=status.HTTP_400_BAD_REQUEST)
-        hex_str = ser.validated_data['hex']
-        return self._decoder(request, hex_str)
+        return self._decoder(
+            request, ser.validated_data['hex'])
 
     def _decoder(self, request, hex_str):
         try:
             res = decoder_hex(hex_str)
             sauvegarder(request, 'DECODE',
-                        hex_str, res['texte'],
-                        len(res['texte']),
-                        len(res['details']))
+                hex_str, res['texte'],
+                len(res['texte']), len(res['details']))
             return Response({
                 'texte':   res['texte'],
                 'details': res['details'],
             })
         except Exception as e:
-            return Response(
-                {'erreur': str(e)},
+            return Response({'erreur': str(e)},
                 status=status.HTTP_400_BAD_REQUEST)
 
 
 # ════════════════════════════════════════════
-#  VUE ANALYSER
+#  ANALYSER
 # ════════════════════════════════════════════
+@extend_schema_view(
+    get=extend_schema(
+        tags=['analyser'],
+        summary='Analyser un caractere Unicode',
+        parameters=[
+            OpenApiParameter(
+                name='char',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Caractere a analyser',
+                examples=[
+                    OpenApiExample('A', value='A'),
+                    OpenApiExample('Euro', value='E'),
+                ])
+        ]),
+    post=extend_schema(
+        tags=['analyser'],
+        summary='Analyser via POST'))
 class AnalyserAPIView(APIView):
-    """
-    Analyse un caractere Unicode
-
-    GET /api/analyser/?char=€
-    POST /api/analyser/
-    Body: {"char": "€"}
-    """
+    """Analyse un caractere Unicode"""
 
     def get(self, request):
-        char = request.query_params.get(
-            'char', '')
+        char = request.query_params.get('char', '')
         if not char:
             return Response(
                 {'erreur': 'Parametre char requis'},
@@ -166,18 +205,16 @@ class AnalyserAPIView(APIView):
     def post(self, request):
         ser = AnalyserSerializer(data=request.data)
         if not ser.is_valid():
-            return Response(
-                ser.errors,
+            return Response(ser.errors,
                 status=status.HTTP_400_BAD_REQUEST)
-        char = ser.validated_data['char']
-        return self._analyser(request, char)
+        return self._analyser(
+            request, ser.validated_data['char'])
 
     def _analyser(self, request, char):
         try:
             res = analyser_char(char[0])
             sauvegarder(request, 'ANALYSE',
-                        char[0], res['hex'],
-                        1, res['n'])
+                char[0], res['hex'], 1, res['n'])
             return Response({
                 'char':    res['char'],
                 'cp':      res['cp'],
@@ -190,22 +227,40 @@ class AnalyserAPIView(APIView):
                 'cat':     res['cat'],
             })
         except Exception as e:
-            return Response(
-                {'erreur': str(e)},
+            return Response({'erreur': str(e)},
                 status=status.HTTP_400_BAD_REQUEST)
 
 
 # ════════════════════════════════════════════
-#  VUE COMPARER
+#  COMPARER
 # ════════════════════════════════════════════
+@extend_schema_view(
+    get=extend_schema(
+        tags=['comparer'],
+        summary='Comparer deux textes UTF-8',
+        parameters=[
+            OpenApiParameter(
+                name='t1',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Premier texte'),
+            OpenApiParameter(
+                name='t2',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Deuxieme texte'),
+        ]),
+    post=extend_schema(
+        tags=['comparer'],
+        summary='Comparer via POST',
+        examples=[
+            OpenApiExample(
+                'cafe vs cafe accent',
+                value={'texte1': 'cafe', 'texte2': 'cafe'},
+                request_only=True),
+        ]))
 class ComparerAPIView(APIView):
-    """
-    Compare deux textes UTF-8
-
-    GET /api/comparer/?t1=café&t2=cafe
-    POST /api/comparer/
-    Body: {"texte1": "café", "texte2": "cafe"}
-    """
+    """Compare deux textes UTF-8"""
 
     def get(self, request):
         t1 = request.query_params.get('t1', '')
@@ -219,8 +274,7 @@ class ComparerAPIView(APIView):
     def post(self, request):
         ser = ComparerSerializer(data=request.data)
         if not ser.is_valid():
-            return Response(
-                ser.errors,
+            return Response(ser.errors,
                 status=status.HTTP_400_BAD_REQUEST)
         t1 = ser.validated_data['texte1']
         t2 = ser.validated_data['texte2']
@@ -232,11 +286,10 @@ class ComparerAPIView(APIView):
             res['diff_octets'] = abs(
                 res['oct1'] - res['oct2'])
             sauvegarder(request, 'COMPARE',
-                        t1 + ' vs ' + t2,
-                        str(len(res['differences'])) +
-                        ' diff.',
-                        len(t1) + len(t2),
-                        res['oct1'] + res['oct2'])
+                t1 + ' vs ' + t2,
+                str(len(res['differences'])) + ' diff.',
+                len(t1) + len(t2),
+                res['oct1'] + res['oct2'])
             return Response({
                 'texte1':      t1,
                 'texte2':      t2,
@@ -248,26 +301,32 @@ class ComparerAPIView(APIView):
                 'differences': res['differences'],
             })
         except Exception as e:
-            return Response(
-                {'erreur': str(e)},
+            return Response({'erreur': str(e)},
                 status=status.HTTP_400_BAD_REQUEST)
 
 
 # ════════════════════════════════════════════
-#  VUE STATS
+#  STATS
 # ════════════════════════════════════════════
+@extend_schema_view(
+    get=extend_schema(
+        tags=['stats'],
+        summary='Statistiques UTF-8 d un texte',
+        parameters=[
+            OpenApiParameter(
+                name='texte',
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description='Texte a analyser'),
+        ]),
+    post=extend_schema(
+        tags=['stats'],
+        summary='Stats via POST'))
 class StatsAPIView(APIView):
-    """
-    Statistiques UTF-8 d'un texte
-
-    GET /api/stats/?texte=Bonjour
-    POST /api/stats/
-    Body: {"texte": "Bonjour"}
-    """
+    """Statistiques UTF-8 d un texte"""
 
     def get(self, request):
-        texte = request.query_params.get(
-            'texte', '')
+        texte = request.query_params.get('texte', '')
         if not texte:
             return Response(
                 {'erreur': 'Parametre texte requis'},
@@ -277,21 +336,18 @@ class StatsAPIView(APIView):
     def post(self, request):
         ser = StatsSerializer(data=request.data)
         if not ser.is_valid():
-            return Response(
-                ser.errors,
+            return Response(ser.errors,
                 status=status.HTTP_400_BAD_REQUEST)
-        texte = ser.validated_data['texte']
-        return self._stats(request, texte)
+        return self._stats(
+            request, ser.validated_data['texte'])
 
     def _stats(self, request, texte):
         try:
             res = analyser_texte(texte)
             sauvegarder(request, 'STATS',
-                        texte,
-                        str(res['nb_octets']) +
-                        ' octets',
-                        res['nb_chars'],
-                        res['nb_octets'])
+                texte,
+                str(res['nb_octets']) + ' octets',
+                res['nb_chars'], res['nb_octets'])
             types_out = {}
             for n in range(1, 5):
                 types_out[str(n)] = res['types'][n]
@@ -299,37 +355,39 @@ class StatsAPIView(APIView):
                 'texte':     texte,
                 'nb_chars':  res['nb_chars'],
                 'nb_octets': res['nb_octets'],
-                'pct_ascii': round(
-                    res['pct_ascii'], 2),
+                'pct_ascii': round(res['pct_ascii'], 2),
                 'types':     types_out,
             })
         except Exception as e:
-            return Response(
-                {'erreur': str(e)},
+            return Response({'erreur': str(e)},
                 status=status.HTTP_400_BAD_REQUEST)
 
 
 # ════════════════════════════════════════════
-#  VUE HISTORIQUE
+#  HISTORIQUE
 # ════════════════════════════════════════════
+@extend_schema(
+    tags=['historique'],
+    summary='Historique des conversions',
+    parameters=[
+        OpenApiParameter(
+            name='limit',
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.QUERY,
+            description='Nombre de resultats',
+            default=20),
+    ])
 class HistoriqueAPIView(APIView):
-    """
-    Historique des conversions
-
-    GET /api/historique/
-    GET /api/historique/?limit=10
-    """
+    """Historique des conversions"""
 
     def get(self, request):
-        limite = int(request.query_params.get(
-            'limit', 20))
+        limite = int(request.query_params.get('limit', 20))
         if request.user.is_authenticated:
             items = Historique.objects.filter(
                 user=request.user)[:limite]
         else:
             items = Historique.objects.all()[:limite]
-        ser = HistoriqueSerializer(
-            items, many=True)
+        ser = HistoriqueSerializer(items, many=True)
         return Response({
             'count':      len(ser.data),
             'historique': ser.data,
@@ -337,21 +395,14 @@ class HistoriqueAPIView(APIView):
 
 
 # ════════════════════════════════════════════
-#  VUE FAVORIS
+#  FAVORIS
 # ════════════════════════════════════════════
 class FavoriAPIView(APIView):
-    """
-    Gestion des favoris
-
-    GET  /api/favoris/      → liste
-    POST /api/favoris/      → créer
-    DELETE /api/favoris/1/  → supprimer
-    """
+    """Gestion des favoris"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        items = Favori.objects.filter(
-            user=request.user)
+        items = Favori.objects.filter(user=request.user)
         ser = FavoriSerializer(items, many=True)
         return Response(ser.data)
 
@@ -359,48 +410,31 @@ class FavoriAPIView(APIView):
         ser = FavoriSerializer(data=request.data)
         if ser.is_valid():
             ser.save(user=request.user)
-            return Response(
-                ser.data,
+            return Response(ser.data,
                 status=status.HTTP_201_CREATED)
-        return Response(
-            ser.errors,
+        return Response(ser.errors,
             status=status.HTTP_400_BAD_REQUEST)
 
 
 # ════════════════════════════════════════════
-#  VUE API ROOT
+#  API ROOT
 # ════════════════════════════════════════════
+@extend_schema(exclude=True)
 @api_view(['GET'])
 def api_root(request):
-    """
-    UTF-8 Converter API — Point d'entrée
-
-    Routes disponibles :
-    - GET/POST /api/encoder/
-    - GET/POST /api/decoder/
-    - GET/POST /api/analyser/
-    - GET/POST /api/comparer/
-    - GET/POST /api/stats/
-    - GET      /api/historique/
-    - GET/POST /api/favoris/
-    """
+    """UTF-8 Converter API - Point d entree"""
     return Response({
-        'message':  'UTF-8 Converter API v2.0',
-        'version':  '2.0',
+        'message': 'UTF-8 Converter API v2.0',
+        'version': '2.0',
+        'docs':    request.build_absolute_uri('/api/docs/'),
+        'redoc':   request.build_absolute_uri('/api/redoc/'),
         'routes': {
-            'encoder':    request.build_absolute_uri(
-                '/api/encoder/'),
-            'decoder':    request.build_absolute_uri(
-                '/api/decoder/'),
-            'analyser':   request.build_absolute_uri(
-                '/api/analyser/'),
-            'comparer':   request.build_absolute_uri(
-                '/api/comparer/'),
-            'stats':      request.build_absolute_uri(
-                '/api/stats/'),
-            'historique': request.build_absolute_uri(
-                '/api/historique/'),
-            'favoris':    request.build_absolute_uri(
-                '/api/favoris/'),
+            'encoder':    request.build_absolute_uri('/api/encoder/'),
+            'decoder':    request.build_absolute_uri('/api/decoder/'),
+            'analyser':   request.build_absolute_uri('/api/analyser/'),
+            'comparer':   request.build_absolute_uri('/api/comparer/'),
+            'stats':      request.build_absolute_uri('/api/stats/'),
+            'historique': request.build_absolute_uri('/api/historique/'),
+            'favoris':    request.build_absolute_uri('/api/favoris/'),
         }
     })

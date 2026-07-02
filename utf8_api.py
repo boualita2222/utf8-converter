@@ -366,7 +366,7 @@ HTML_PAGE = """
 
 <script>
 // ── ENCODER ──────────────────────────────
-async function encoder() {
+window.encoder = async function() {
     const texte = document.getElementById(
         'enc-input').value.trim();
     if (!texte) return;
@@ -410,7 +410,7 @@ async function encoder() {
 }
 
 // ── DECODER ──────────────────────────────
-async function decoder() {
+window.decoder = async function() {
     const hex = document.getElementById(
         'dec-input').value.trim();
     if (!hex) return;
@@ -447,7 +447,7 @@ async function decoder() {
 }
 
 // ── ANALYSER ─────────────────────────────
-async function analyser() {
+window.analyser = async function() {
     const c = document.getElementById(
         'ana-input').value.trim();
     if (!c) return;
@@ -489,7 +489,7 @@ async function analyser() {
 }
 
 // ── COMPARER ─────────────────────────────
-async function comparer_textes() {
+window.comparer_textes = async function() {
     const t1 = document.getElementById(
         'cmp-input1').value.trim();
     const t2 = document.getElementById(
@@ -544,7 +544,7 @@ async function comparer_textes() {
 }
 
 // ── STATS ────────────────────────────────
-async function stats() {
+window.stats = async function() {
     const texte = document.getElementById(
         'stats-input').value.trim();
     if (!texte) return;
@@ -598,7 +598,7 @@ async function stats() {
 }
 
 // ── HISTORIQUE ───────────────────────────
-async function charger_hist() {
+window.charger_hist = async function() {
     const res = document.getElementById(
         'historique-list');
     try {
@@ -634,7 +634,7 @@ async function charger_hist() {
 }
 
 // ── RESUME ───────────────────────────────
-async function charger_resume() {
+window.charger_resume = async function() {
     const res = document.getElementById(
         'historique-list');
     try {
@@ -673,7 +673,7 @@ async function charger_resume() {
 }
 
 // ── EFFACER ──────────────────────────────
-function effacer(prefix) {
+window.effacer = function(prefix) {
     const ids = {
         'enc': ['enc-input',
                 'enc-result'],

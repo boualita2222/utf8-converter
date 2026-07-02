@@ -2,28 +2,27 @@
 *.db
 *.db-journal
 
-# Python cache
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.spec
 
 # PyInstaller
 build/
 dist/
-*.spec
 
-# Environnement
-venv/
+# Environnement virtuel
 venv_314/
+venv/
 .env
 
 # VS Code
 .vscode/
 
-# Fichiers inutiles
-string_old.py
-colorama_old.py
+# Fichiers temporaires
 *.tmp
 *.log
-staticfiles/
+string_old.py
+colorama_old.py

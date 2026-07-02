@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Convertisseur UTF-8 universel | Encodage, décodage, stats & couleurs</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Fira Code', 'Roboto Mono', monospace;
+        }
+
+        body {
+            background: #f1f5f9;
+            margin: 0;
+            padding: 20px;
+            color: #0f172a;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.15);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 0.75rem 1.5rem 0 1.5rem;
+            gap: 0.25rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 0.8rem 1.6rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 1.5rem 1.5rem 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #334155;
+            font-family: inherit;
+        }
+
+        .tab-btn:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.02);
+        }
+
+        .tab-pane {
+            display: none;
+            padding: 2rem 1.8rem;
+            animation: fade 0.2s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(5px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* UI components */
+        .card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #eef2ff;
+        }
+
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            font-size: 0.95rem;
+            font-family: 'Fira Code', monospace;
+            border: 1px solid #cbd5e1;
+            border-radius: 1rem;
+            background: #fefce8;
+            transition: 0.2s;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+        }
+
+        select, button {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.2s;
+        }
+
+        button.primary {
+            background: #2563eb;
+            color: white;
+            border: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button.primary:hover {
+            background: #1d4ed8;
+        }
+
+        .output-area {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1.2rem;
+            border-radius: 1.2rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .color-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.75rem;
+            margin: 0.1rem 0.2rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* couleurs par longueur UTF-8 */
+        .len1 { background-color: #bbf7d0; color: #14532d; border-left: 4px solid #22c55e; padding: 0.15rem 0.4rem; border-radius: 0.5rem; margin: 0 2px; display: inline-block; }
+        .len2 { background-color: #bae6fd; color: #0c4a6e; border-left: 4px solid #0ea5e9; padding: 0.15rem 0.4rem; border-radius: 0.5rem; margin: 0 2px; display: inline-block; }
+        .len3 { background-color: #fed7aa; color: #7c2d12; border-left: 4px solid #f97316; padding: 0.15rem 0.4rem; border-radius: 0.5rem; margin: 0 2px; display: inline-block; }
+        .len4 { background-color: #fecaca; color: #7f1d1d; border-left: 4px solid #ef4444; padding: 0.15rem 0.4rem; border-radius: 0.5rem; margin: 0 2px; display: inline-block; }
+
+        .byte-group {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-right: 0.75rem;
+            margin-bottom: 0.3rem;
+        }
+
+        hr {
+            margin: 1rem 0;
+            border-color: #e2e8f0;
+        }
+
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: space-between;
+        }
+        .stat-card {
+            background: #f1f5f9;
+            border-radius: 1rem;
+            padding: 0.8rem 1.2rem;
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        .compare-wrapper {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+        .compare-col {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .info-note {
+            font-size: 0.8rem;
+            color: #475569;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 700px) {
+            .tab-btn { padding: 0.5rem 1rem; font-size: 0.85rem; }
+            .tab-pane { padding: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="home">🏠 Accueil</button>
+        <button class="tab-btn" data-tab="encrypt">🔐 Chiffrement (UTF-8 → octets)</button>
+        <button class="tab-btn" data-tab="decrypt">🔓 Déchiffrement (octets → texte)</button>
+        <button class="tab-btn" data-tab="compare">⚖️ Comparaison</button>
+        <button class="tab-btn" data-tab="stats">📊 Statistiques</button>
+    </div>
+
+    <!-- ACCUEIL -->
+    <div id="home" class="tab-pane active">
+        <div class="card">
+            <h2>🧩 Convertisseur UTF-8 universel</h2>
+            <p>Outil complet pour visualiser, analyser et convertir du texte en UTF-8. Chaque caractère est coloré selon sa longueur (1 à 4 octets). Supporte l'affichage hexadécimal, décimal (espace ou pointé), binaire, et l'ordre big‑endian / little‑endian.</p>
+            <h3>✨ Fonctionnalités</h3>
+            <ul>
+                <li><strong>Chiffrement</strong> : texte → séquences UTF-8 colorées</li>
+                <li><strong>Déchiffrement</strong> : octets (hex, décimal pointé, binaire, etc) → texte lisible</li>
+                <li><strong>Comparaison</strong> : contraste deux textes et leur empreinte UTF-8</li>
+                <li><strong>Statistiques</strong> : détail des caractères par longueur, octets totaux</li>
+                <li><strong>Sortie codée couleur</strong> (1,2,3,4 octets) et multiples représentations numériques</li>
+                <li>Affichage <strong>big‑endian classique</strong> ou <strong>little‑endian inversé</strong> par caractère</li>
+            </ul>
+            <p>💡 Essayez les onglets <strong>Chiffrement</strong> et <strong>Déchiffrement</strong> pour voir la magie des couleurs !</p>
+            <button id="demoEmoji" class="primary">✨ Tester avec un emoji (🎉🐧⚡)</button>
+        </div>
+    </div>
+
+    <!-- CHIFFREMENT (texte -> UTF-8) -->
+    <div id="encrypt" class="tab-pane">
+        <div class="card">
+            <label>📝 Texte à encoder (UTF-8) :</label>
+            <textarea id="encText" rows="3" placeholder="Exemples : Café 🍵, 你好, Unicode ✨, 𓀠𓀡𓀢">Hello 🌍 UTF-8</textarea>
+            <div class="flex-row" style="margin-top: 1rem;">
+                <div>
+                    <label>🎨 Format d'affichage : </label>
+                    <select id="encFormat">
+                        <option value="hex">Hexadécimal (ex: E2 82 AC)</option>
+                        <option value="dec_space">Décimal (espaces : 226 130 172)</option>
+                        <option value="dec_dotted">Décimal pointé (226.130.172)</option>
+                        <option value="binary">Binaire (11100010 10000010 10101100)</option>
+                    </select>
+                </div>
+                <div>
+                    <label>🔄 Ordre des octets : </label>
+                    <select id="encEndian">
+                        <option value="big">Big‑endian (standard UTF-8)</option>
+                        <option value="little">Little‑endian (inversé par caractère)</option>
+                    </select>
+                </div>
+                <button id="copyEncBtn" class="primary">📋 Copier sortie</button>
+            </div>
+            <div class="info-note">✅ Chaque groupe coloré = un caractère. Couleur = longueur UTF-8 (1:vert, 2:bleu, 3:orange, 4:rouge).</div>
+        </div>
+        <div class="card">
+            <div class="output-area" id="encOutput">
+                <!-- resultat coloré -->
+                <span style="color:#94a3b8;">Cliquez ou tapez pour voir l'encodage coloré...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DÉCHIFFREMENT (octets -> texte) -->
+    <div id="decrypt" class="tab-pane">
+        <div class="card">
+            <label>🔢 Séquence d'octets (UTF-8) :</label>
+            <textarea id="decBytesInput" rows="3" placeholder="Exemples: 48 65 6C 6C 6F   ou   72.C3.A9   ou   11100010 10000010 10101100"></textarea>
+            <div class="flex-row">
+                <div>
+                    <label>📐 Format d'entrée : </label>
+                    <select id="decInputFormat">
+                        <option value="auto">Auto (détection hex/décimal/binaire/pointé)</option>
+                        <option value="hex">Hexadécimal (espaces)</option>
+                        <option value="dec_space">Décimal (espaces)</option>
+                        <option value="dec_dotted">Décimal pointé (ex: 72.101.108)</option>
+                        <option value="binary">Binaire (espaces entre octets)</option>
+                    </select>
+                </div>
+                <button id="decodeBtn" class="primary">🔁 Décoder</button>
+                <button id="copyDecTxtBtn" class="primary">📋 Copier texte</button>
+            </div>
+            <div class="info-note">💡 Les octets sont automatiquement convertis en texte UTF-8. Résultat coloré par longueur d'octets.</div>
+        </div>
+        <div class="card">
+            <div><strong>📄 Texte décodé (coloré par caractère) :</strong></div>
+            <div class="output-area" id="decodedTextOutput" style="margin-top: 0.5rem;">—</div>
+            <div style="margin-top: 1rem;"><strong>🎨 Représentation des octets décodés :</strong></div>
+            <div class="output-area" id="decodedBytesVisual" style="margin-top: 0.5rem;">—</div>
+        </div>
+    </div>
+
+    <!-- COMPARAISON -->
+    <div id="compare" class="tab-pane">
+        <div class="compare-wrapper">
+            <div class="compare-col">
+                <div class="card"><label>Texte A :</label><textarea id="compTextA" rows="3">Café ☕</textarea>
+                <div class="output-area" id="compOutA" style="margin-top: 1rem;">—</div></div>
+            </div>
+            <div class="compare-col">
+                <div class="card"><label>Texte B :</label><textarea id="compTextB" rows="3">Cafe\u0301 ☕</textarea>
+                <div class="output-area" id="compOutB" style="margin-top: 1rem;">—</div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="flex-row"><span><strong>📊 Différence & résumé</strong></span>
+                <select id="compFormat">
+                    <option value="hex">Hexadécimal</option>
+                    <option value="dec_dotted">Décimal pointé</option>
+                    <option value="binary">Binaire</option>
+                </select>
+            </div>
+            <div id="compStats" class="output-area" style="background:#eef2ff; color:#0f172a;">Saisissez du texte pour comparer l'empreinte UTF-8</div>
+        </div>
+    </div>
+
+    <!-- STATISTIQUES -->
+    <div id="stats" class="tab-pane">
+        <div class="card">
+            <label>🔍 Texte source à analyser :</label>
+            <textarea id="statsText" rows="3">Exemple: こんにちは世界 🌍✨ 𓂀</textarea>
+            <button id="refreshStats" class="primary" style="margin-top: 0.8rem;">Mettre à jour les statistiques</button>
+        </div>
+        <div class="card" id="statsDisplay">
+            <div class="stats-grid">
+                <div class="stat-card">📝 Caractères: <span id="statTotalChars">—</span></div>
+                <div class="stat-card">💾 Octets totaux: <span id="statTotalBytes">—</span></div>
+                <div class="stat-card">🟢 1‑octet: <span id="statLen1">—</span></div>
+                <div class="stat-card">🔵 2‑octets: <span id="statLen2">—</span></div>
+                <div class="stat-card">🟠 3‑octets: <span id="statLen3">—</span></div>
+                <div class="stat-card">🔴 4‑octets: <span id="statLen4">—</span></div>
+            </div>
+            <hr>
+            <div><strong>📈 Distribution :</strong><div id="statBarChart" style="margin-top: 0.8rem;"></div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ---------- UTILITAIRES UTF-8 ----------
+    function getCodePointAndBytes(char) {
+        let cp = char.codePointAt(0);
+        if (cp === undefined) return null;
+        // encoder en UTF-8 manuellement pour avoir les octets précis (TextEncoder aussi fonctionne)
+        const encoder = new TextEncoder();
+        const encoded = encoder.encode(char);
+        let bytes = Array.from(encoded);
+        let length = bytes.length; // 1-4
+        return { cp, bytes, length };
+    }
+
+    // transformer une chaîne en tableau de groupes (chaque groupe: {char, cp, bytes, length})
+    function splitStringToGroups(str) {
+        let groups = [];
+        for (let ch of str) {
+            let res = getCodePointAndBytes(ch);
+            if (res) groups.push({ char: ch, cp: res.cp, bytes: res.bytes, length: res.length });
+        }
+        return groups;
+    }
+
+    // formater un tableau d'octets selon format + endian (big/little)
+    function formatBytes(bytes, format, endian = 'big') {
+        let work = [...bytes];
+        if (endian === 'little') work.reverse();
+        if (format === 'hex') return work.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+        if (format === 'dec_space') return work.map(b => b.toString(10)).join(' ');
+        if (format === 'dec_dotted') return work.map(b => b.toString(10)).join('.');
+        if (format === 'binary') return work.map(b => b.toString(2).padStart(8, '0')).join(' ');
+        return work.join(' ');
+    }
+
+    // Génère la vue HTML colorée (texte => groupes + représentation)
+    function generateColoredUTF8View(text, format, endian = 'big') {
+        if (!text) return '<span style="color:#94a3b8;">[vide]</span>';
+        const groups = splitStringToGroups(text);
+        let html = '';
+        for (let g of groups) {
+            let lenClass = `len${g.length}`;
+            let byteRepr = formatBytes(g.bytes, format, endian);
+            html += `<div class="byte-group"><span class="${lenClass}">${escapeHtml(g.char)}</span>  <span style="font-family:monospace; background:#1e293b; padding:0.1rem 0.4rem; border-radius:12px;">${byteRepr}</span></div>`;
+        }
+        return html || '<span>—</span>';
+    }
+
+    // Génère juste le résumé des octets bruts pour decode
+    function generateBytesFromGroups(groups, format, endian) {
+        let html = '';
+        for (let g of groups) {
+            let lenClass = `len${g.length}`;
+            let byteRepr = formatBytes(g.bytes, format, endian);
+            html += `<div class="byte-group"><span class="${lenClass}">${escapeHtml(g.char)}</span>  <span style="font-family:monospace;">[${byteRepr}]</span></div>`;
+        }
+        return html;
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
+
+    // Décodage d'une chaîne d'octets (texte utilisateur)
+    function parseBytesFromInput(inputStr, formatMode) {
+        let trimmed = inputStr.trim();
+        if (!trimmed) return null;
+        let numbers = [];
+        if (formatMode === 'auto') {
+            // détection intelligente
+            if (/^[0-9A-Fa-f\s]+$/.test(trimmed) && trimmed.match(/[A-Fa-f]/) && !trimmed.match(/[^0-9A-Fa-f\s]/)) {
+                let parts = trimmed.split(/\s+/);
+                for (let p of parts) { let v = parseInt(p, 16); if (isNaN(v)) return null; numbers.push(v); }
+            } else if (/^[\d\.\s]+$/.test(trimmed) && trimmed.includes('.')) {
+                let parts = trimmed.split('.');
+                for (let p of parts) { let v = parseInt(p, 10); if (isNaN(v)) return null; numbers.push(v); }
+            } else if (/^[01\s]+$/.test(trimmed)) {
+                let parts = trimmed.split(/\s+/);
+                for (let p of parts) { let v = parseInt(p, 2); if (isNaN(v)) return null; numbers.push(v); }
+            } else if (/^\d+(\s+\d+)*$/.test(trimmed)) {
+                let parts = trimmed.split(/\s+/);
+                for (let p of parts) { let v = parseInt(p, 10); if (isNaN(v)) return null; numbers.push(v); }
+            } else return null;
+        } else if (formatMode === 'hex') {
+            let parts = trimmed.split(/\s+/);
+            for (let p of parts) { let v = parseInt(p, 16); if (isNaN(v)) return null; numbers.push(v); }
+        } else if (formatMode === 'dec_space') {
+            let parts = trimmed.split(/\s+/);
+            for (let p of parts) { let v = parseInt(p, 10); if (isNaN(v)) return null; numbers.push(v); }
+        } else if (formatMode === 'dec_dotted') {
+            let parts = trimmed.split('.');
+            for (let p of parts) { let v = parseInt(p, 10); if (isNaN(v)) return null; numbers.push(v); }
+        } else if (formatMode === 'binary') {
+            let parts = trimmed.split(/\s+/);
+            for (let p of parts) { let v = parseInt(p, 2); if (isNaN(v)) return null; numbers.push(v); }
+        }
+        if (numbers.length === 0) return null;
+        if (numbers.some(b => b < 0 || b > 255)) return null;
+        return new Uint8Array(numbers);
+    }
+
+    // statistiques complètes sur texte
+    function computeStats(text) {
+        let groups = splitStringToGroups(text);
+        let totalBytes = groups.reduce((acc,g) => acc + g.bytes.length, 0);
+        let counts = {1:0,2:0,3:0,4:0};
+        for (let g of groups) counts[g.length]++;
+        return { totalChars: groups.length, totalBytes, len1: counts[1], len2: counts[2], len3: counts[3], len4: counts[4], groups };
+    }
+
+    // affiche les stats dans le panneau
+    function updateStatsUI(text) {
+        let stats = computeStats(text);
+        document.getElementById('statTotalChars').innerText = stats.totalChars;
+        document.getElementById('statTotalBytes').innerText = stats.totalBytes;
+        document.getElementById('statLen1').innerText = stats.len1;
+        document.getElementById('statLen2').innerText = stats.len2;
+        document.getElementById('statLen3').innerText = stats.len3;
+        document.getElementById('statLen4').innerText = stats.len4;
+        let total = stats.totalChars || 1;
+        let bar = `<div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+            <div style="background:#22c55e; width:${(stats.len1/total)*100}%; height:24px; border-radius:20px; text-align:center; color:black;">1o (${stats.len1})</div>
+            <div style="background:#0ea5e9; width:${(stats.len2/total)*100}%; height:24px; border-radius:20px;">2o (${stats.len2})</div>
+            <div style="background:#f97316; width:${(stats.len3/total)*100}%; height:24px; border-radius:20px;">3o (${stats.len3})</div>
+            <div style="background:#ef4444; width:${(stats.len4/total)*100}%; height:24px; border-radius:20px;">4o (${stats.len4})</div>
+        </div>`;
+        document.getElementById('statBarChart').innerHTML = bar;
+    }
+
+    // -------- rafraîchir onglet encodage --------
+    function refreshEncrypt() {
+        let text = document.getElementById('encText').value;
+        let format = document.getElementById('encFormat').value;
+        let endian = document.getElementById('encEndian').value;
+        let outputDiv = document.getElementById('encOutput');
+        outputDiv.innerHTML = generateColoredUTF8View(text, format, endian);
+    }
+
+    // décodage avec affichage texte + octets colorés
+    function refreshDecrypt() {
+        let rawInput = document.getElementById('decBytesInput').value;
+        let formatMode = document.getElementById('decInputFormat').value;
+        let bytes = parseBytesFromInput(rawInput, formatMode);
+        let decodedDiv = document.getElementById('decodedTextOutput');
+        let bytesVisualDiv = document.getElementById('decodedBytesVisual');
+        if (!bytes || bytes.length === 0) {
+            decodedDiv.innerHTML = '<span style="color:#f87171;">❌ Erreur : séquence d’octets invalide</span>';
+            bytesVisualDiv.innerHTML = '—';
+            return;
+        }
+        try {
+            let decoder = new TextDecoder('utf-8', { fatal: true });
+            let decodedText = decoder.decode(bytes);
+            // on va colorer le texte décodé par groupes
+            let groups = splitStringToGroups(decodedText);
+            let formatVisu = document.getElementById('encFormat').value; // on utilise le même format pour cohérence
+            let endian = document.getElementById('encEndian').value;
+            let coloredHtml = '';
+            for (let g of groups) {
+                coloredHtml += `<span class="len${g.length}" style="display:inline-block; padding:0.2rem 0.4rem; margin:2px;">${escapeHtml(g.char)}</span>`;
+            }
+            decodedDiv.innerHTML = coloredHtml || `<span>${escapeHtml(decodedText)}</span>`;
+            // affichage des octets avec leurs couleurs
+            let bytesHtml = generateBytesFromGroups(groups, formatVisu, endian);
+            bytesVisualDiv.innerHTML = bytesHtml || `<span style="color:#cbd5e1;">[aucun octet]</span>`;
+        } catch(e) {
+            decodedDiv.innerHTML = `<span style="color:#f87171;">⚠️ Échec du décodage UTF-8 : séquence invalide (${e.message})</span>`;
+            bytesVisualDiv.innerHTML = '—';
+        }
+    }
+
+    // comparateur
+    function refreshCompare() {
+        let textA = document.getElementById('compTextA').value;
+        let textB = document.getElementById('compTextB').value;
+        let format = document.getElementById('compFormat').value;
+        let endian = 'big';
+        let outA = generateColoredUTF8View(textA, format, endian);
+        let outB = generateColoredUTF8View(textB, format, endian);
+        document.getElementById('compOutA').innerHTML = outA;
+        document.getElementById('compOutB').innerHTML = outB;
+        let statsA = computeStats(textA);
+        let statsB = computeStats(textB);
+        let diffBytes = statsA.totalBytes - statsB.totalBytes;
+        let diffChars = statsA.totalChars - statsB.totalChars;
+        document.getElementById('compStats').innerHTML = `
+            <div><strong>📏 Taille A :</strong> ${statsA.totalChars} caractères, ${statsA.totalBytes} octets<br>
+            <strong>📏 Taille B :</strong> ${statsB.totalChars} caractères, ${statsB.totalBytes} octets</div>
+            <div>🔁 Différence : ${diffChars>0? '+' : ''}${diffChars} caractères  |  ${diffBytes>0? '+' : ''}${diffBytes} octets</div>
+            <div>🎨 Distribution A : 1️⃣${statsA.len1} 2️⃣${statsA.len2} 3️⃣${statsA.len3} 4️⃣${statsA.len4}</div>
+            <div>🎨 Distribution B : 1️⃣${statsB.len1} 2️⃣${statsB.len2} 3️⃣${statsB.len3} 4️⃣${statsB.len4}</div>
+        `;
+    }
+
+    // update global events
+    function bindEvents() {
+        document.getElementById('encText').addEventListener('input', refreshEncrypt);
+        document.getElementById('encFormat').addEventListener('change', refreshEncrypt);
+        document.getElementById('encEndian').addEventListener('change', refreshEncrypt);
+        document.getElementById('copyEncBtn').addEventListener('click', () => {
+            let txt = document.getElementById('encOutput').innerText;
+            navigator.clipboard.writeText(txt);
+            alert('Sortie copiée !');
+        });
+        document.getElementById('decodeBtn').addEventListener('click', refreshDecrypt);
+        document.getElementById('decInputFormat').addEventListener('change', refreshDecrypt);
+        document.getElementById('encFormat').addEventListener('change', refreshDecrypt); // pour mettre à jour représentation decode
+        document.getElementById('encEndian').addEventListener('change', refreshDecrypt);
+        document.getElementById('copyDecTxtBtn').addEventListener('click', () => {
+            let txtarea = document.getElementById('decodedTextOutput').innerText;
+            navigator.clipboard.writeText(txtarea);
+            alert('Texte décodé copié');
+        });
+        document.getElementById('compTextA').addEventListener('input', refreshCompare);
+        document.getElementById('compTextB').addEventListener('input', refreshCompare);
+        document.getElementById('compFormat').addEventListener('change', refreshCompare);
+        document.getElementById('refreshStats').addEventListener('click', () => {
+            let txt = document.getElementById('statsText').value;
+            updateStatsUI(txt);
+        });
+        document.getElementById('statsText').addEventListener('input', () => {
+            let txt = document.getElementById('statsText').value;
+            updateStatsUI(txt);
+        });
+        document.getElementById('demoEmoji').addEventListener('click', () => {
+            document.getElementById('encText').value = "Bonjour 🌍 UTF-8 🎉✨ 𓀠𓀡 你好, café 🍕";
+            refreshEncrypt();
+            if(document.querySelector('.tab-btn[data-tab="encrypt"]')) document.querySelector('.tab-btn[data-tab="encrypt"]').click();
+        });
+        // initial stats
+        updateStatsUI(document.getElementById('statsText').value);
+        refreshEncrypt();
+        refreshCompare();
+    }
+
+    // Tab switching
+    function initTabs() {
+        const btns = document.querySelectorAll('.tab-btn');
+        const panes = document.querySelectorAll('.tab-pane');
+        btns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                let tabId = btn.getAttribute('data-tab');
+                panes.forEach(pane => pane.classList.remove('active'));
+                btns.forEach(b => b.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                btn.classList.add('active');
+                if(tabId === 'encrypt') refreshEncrypt();
+                if(tabId === 'decrypt') refreshDecrypt();
+                if(tabId === 'compare') refreshCompare();
+                if(tabId === 'stats') updateStatsUI(document.getElementById('statsText').value);
+            });
+        });
+    }
+
+    initTabs();
+    bindEvents();
+    refreshDecrypt(); // initial decode output
+</script>
+</body>
+</html>
+
