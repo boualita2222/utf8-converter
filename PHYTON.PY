@@ -1,7 +1,0 @@
->>> cp = ord("é")
->>> print(cp)
->>> print(bin(cp))
->>> print(cp >> 6)
->>> print(bin(cp >> 6))
->>> print(cp & 0b00111111)
->>> print(bin(cp & 0b00111111))
