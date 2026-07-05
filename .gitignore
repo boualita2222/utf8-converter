@@ -26,3 +26,6 @@ venv/
 *.log
 string_old.py
 colorama_old.py
+utf8site/db.sqlite3
+
+utf8site/db.sqlite3
