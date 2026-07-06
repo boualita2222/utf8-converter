@@ -37,7 +37,6 @@ from .serializers import (HistoriqueSerializer,
 
 def sauvegarder(request, op, entree,
                 sortie, nb_chars, nb_octets):
-    """Sauvegarde une conversion en DB"""
     Historique.objects.create(
         user      = request.user
                     if request.user.is_authenticated
