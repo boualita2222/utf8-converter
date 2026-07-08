@@ -1,0 +1,269 @@
+openapi: 3.0.3
+info:
+  title: UTF-8 Converter API
+  version: 2.0.0
+  description: "\nAPI complète pour encoder, décoder et analyser\ndes caractères Unicode
+    UTF-8.\n\n## Fonctionnalités\n- **Encoder** : Texte → Hex UTF-8\n- **Decoder**
+    : Hex UTF-8 → Texte\n- **Analyser** : Détails d'un caractère\n- **Comparer** :
+    Deux textes côte à côte\n- **Stats**   : Statistiques UTF-8\n\n## Auteur\nboualita2222
+    — Python 3.14.2 + Django 6.0\n    "
+  contact:
+    name: boualita2222
+    url: https://github.com/boualita2222
+  license:
+    name: MIT License
+paths:
+  /api/analyser/:
+    get:
+      operationId: analyser_retrieve
+      description: Analyse un caractere Unicode
+      summary: Analyser un caractere Unicode
+      parameters:
+      - in: query
+        name: char
+        schema:
+          type: string
+        description: Caractere a analyser
+        examples:
+          A:
+            value: A
+          Euro:
+            value: E
+      tags:
+      - analyser
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: analyser_create
+      description: Analyse un caractere Unicode
+      summary: Analyser via POST
+      tags:
+      - analyser
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/comparer/:
+    get:
+      operationId: comparer_retrieve
+      description: Compare deux textes UTF-8
+      summary: Comparer deux textes UTF-8
+      parameters:
+      - in: query
+        name: t1
+        schema:
+          type: string
+        description: Premier texte
+      - in: query
+        name: t2
+        schema:
+          type: string
+        description: Deuxieme texte
+      tags:
+      - comparer
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: comparer_create
+      description: Compare deux textes UTF-8
+      summary: Comparer via POST
+      tags:
+      - comparer
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/decoder/:
+    get:
+      operationId: decoder_retrieve
+      description: Decode une sequence hex UTF-8
+      summary: Decoder une sequence hex UTF-8
+      parameters:
+      - in: query
+        name: hex
+        schema:
+          type: string
+        description: Sequence hex a decoder
+        examples:
+          EAccent:
+            value: C3 A9
+            summary: e accent
+          Euro:
+            value: E2 82 AC
+          Emoji:
+            value: F0 9F 90 8D
+      tags:
+      - decoder
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: decoder_create
+      description: Decode une sequence hex UTF-8
+      summary: Decoder via POST
+      tags:
+      - decoder
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/encoder/:
+    get:
+      operationId: encoder_retrieve
+      description: Convertit un texte en sequence hexadecimale UTF-8
+      summary: Encoder un texte en UTF-8
+      parameters:
+      - in: query
+        name: texte
+        schema:
+          type: string
+        description: Texte a encoder
+        examples:
+          Simple:
+            value: cafe
+          Bonjour:
+            value: Bonjour
+      tags:
+      - encoder
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: encoder_create
+      description: Encode un texte en UTF-8
+      summary: Encoder via POST
+      tags:
+      - encoder
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/favoris/:
+    get:
+      operationId: favoris_retrieve
+      description: Gestion des favoris
+      tags:
+      - favoris
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: favoris_create
+      description: Gestion des favoris
+      tags:
+      - favoris
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/historique/:
+    get:
+      operationId: historique_retrieve
+      description: Historique des conversions
+      summary: Historique des conversions
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 20
+        description: Nombre de resultats
+      tags:
+      - historique
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/stats/:
+    get:
+      operationId: stats_retrieve
+      description: Statistiques UTF-8 d un texte
+      summary: Statistiques UTF-8 d un texte
+      parameters:
+      - in: query
+        name: texte
+        schema:
+          type: string
+        description: Texte a analyser
+      tags:
+      - stats
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: stats_create
+      description: Statistiques UTF-8 d un texte
+      summary: Stats via POST
+      tags:
+      - stats
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+tags:
+- name: encoder
+  description: Encodage UTF-8
+- name: decoder
+  description: Decodage UTF-8
+- name: analyser
+  description: Analyse Unicode
+- name: comparer
+  description: Comparaison UTF-8
+- name: stats
+  description: Statistiques
+- name: historique
+  description: Historique
